@@ -340,6 +340,7 @@ def main(input_json, output_markdown, examples_as_yaml, show_examples, token):
     output_md = parser.parse_schema(json.load(input_json))
     click.secho("✔ Successfully parsed schema!", bold=True, fg="green")
     if token:
+        click.secho(f"replacing between token: {token}")
         write_lines_between_token(output_markdown.name, output_md, token)
     else: 
         output_markdown.writelines(output_md)
