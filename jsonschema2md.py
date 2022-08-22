@@ -169,6 +169,8 @@ class Parser:
         if name is None:
             obj_type = f"*{obj['type']}*" if "type" in obj else ""
             name_formatted = ""
+            if obj['title']:
+                name_formatted = obj['title']
         else:
             obj_type = f" *({obj['type']})*" if "type" in obj else ""
             name_formatted = f"**`{name}`**" if name_monospace else f"**{name}**"
@@ -296,12 +298,15 @@ def write_lines_between_token(output_markdown: str, lines: Sequence[str], token:
         lines_old = f.readlines()
     with open(output_markdown, "w") as f:
         for line in lines_old:
+            # ignore old lines between tokens
+            if start_token_found and not end_token_found:
+                continue
             f.write(line)
-            if f"<!--- {token}:START -->" in line:
+            if f"<!-- {token}:START -->" in line:
                 start_token_found = True
-                for line in lines:
-                    f.write(line)
-            if f"<!--- {token}:END -->" in line:
+                for gen_line in lines:
+                    f.write(gen_line)
+            if f"<!-- {token}:END -->" in line:
                 end_token_found = True
     if not start_token_found and end_token_found:
         raise ValueError(
@@ -340,7 +345,6 @@ def main(input_json, output_markdown, examples_as_yaml, show_examples, token):
     output_md = parser.parse_schema(json.load(input_json))
     click.secho("✔ Successfully parsed schema!", bold=True, fg="green")
     if token:
-        click.secho(f"replacing between token: {token}")
         write_lines_between_token(output_markdown.name, output_md, token)
     else: 
         output_markdown.writelines(output_md)
