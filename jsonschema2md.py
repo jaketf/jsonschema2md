@@ -298,6 +298,8 @@ def write_lines_between_token(output_markdown: str, lines: Sequence[str], token:
         lines_old = f.readlines()
     with open(output_markdown, "w") as f:
         for line in lines_old:
+            if f"<!-- {token}:END -->" in line:
+                end_token_found = True
             # ignore old lines between tokens
             if start_token_found and not end_token_found:
                 continue
@@ -306,8 +308,6 @@ def write_lines_between_token(output_markdown: str, lines: Sequence[str], token:
                 start_token_found = True
                 for gen_line in lines:
                     f.write(gen_line)
-            if f"<!-- {token}:END -->" in line:
-                end_token_found = True
     if not start_token_found and end_token_found:
         raise ValueError(
             f"Expected to find `{token}:START` and `{token}:END` comments in file `{output_markdown}`."
