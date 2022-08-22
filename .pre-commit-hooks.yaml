@@ -1,0 +1,6 @@
+- id: jsonschema2md
+  name: JSON Schema to Markdown
+  description: Generates Markdown documentation form JSON schema documents
+  entry: jsonschema2md
+  language: python
+
