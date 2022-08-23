@@ -268,7 +268,6 @@ class TestParser(unittest.TestCase):
             },
         }
         expected_output = [
-            "# JSON Schema\n\n",
             "## Items\n\n",
             "- **Items** *(object)*: A list of fruits.\n",
             "  - **`name`** *(string)*: The name of the fruit.\n",
