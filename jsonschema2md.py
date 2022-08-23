@@ -344,6 +344,7 @@ def write_lines_between_token(output_markdown: str, lines: Sequence[str], token:
 )
 @click.option(
     "--omit-top-level-metadata",
+    is_flag=True,
     type=bool,
     default=False,
     help="Omit top-level metadata (title and description) from the generated markdown.",
