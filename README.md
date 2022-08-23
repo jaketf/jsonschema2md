@@ -101,3 +101,4 @@ for more info.
 ## Changelog
 
 See [Changelog.md](https://github.com/RalfG/jsonschema2md/blob/master/CHANGELOG.md).
+
