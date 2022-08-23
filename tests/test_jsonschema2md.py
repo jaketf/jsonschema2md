@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+import unittest
 
 import jsonschema2md
 from jsonschema2md import write_lines_between_token
@@ -10,7 +11,7 @@ from jsonschema2md import write_lines_between_token
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestParser:
+class TestParser(unittest.TestCase):
     test_schema = {
         "$id": "https://example.com/arrays.schema.json",
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -22,9 +23,9 @@ class TestParser:
             "patternProperties": {
                 "^iLike(Meat|Drinks)$": {
                     "type": "boolean",
-                    "description": "Do I like it?"
+                    "description": "Do I like it?",
                 }
-            }
+            },
         },
         "properties": {
             "fruits": {"type": "array", "items": {"type": "string"}},
@@ -132,8 +133,7 @@ class TestParser:
         expected_output = [
             "# JSON Schema\n\n",
             "*Vegetable preferences*\n\n",
-            "## Additional Properties\n"
-            "\n",
+            "## Additional Properties\n" "\n",
             "- **Additional Properties** *(object)*: Additional info about foods you may "
             "like.\n",
             "  - **`^iLike(Meat|Drinks)$`** *(boolean)*: Do I like it?\n",
@@ -167,24 +167,23 @@ class TestParser:
     def test_parse_schema_examples_yaml(self):
         parser = jsonschema2md.Parser(examples_as_yaml=True)
         expected_output = [
-            '# JSON Schema\n\n',
-            '*Vegetable preferences*\n\n',
-            '## Additional Properties\n'
-            '\n',
-            '- **Additional Properties** *(object)*: Additional info about foods you may '
-            'like.\n',
-            '  - **`^iLike(Meat|Drinks)$`** *(boolean)*: Do I like it?\n',
-            '## Properties\n\n',
-            '- **`fruits`** *(array)*\n',
-            '  - **Items** *(string)*\n',
-            '- **`vegetables`** *(array)*\n',
-            '  - **Items**: Refer to *#/definitions/veggie*.\n',
-            '## Definitions\n\n',
-            '- **`veggie`** *(object)*\n',
-            '  - **`veggieName`** *(string)*: The name of the vegetable.\n',
-            '  - **`veggieLike`** *(boolean)*: Do I like this vegetable?\n',
-            '## Examples\n\n',
-            '  ```yaml\n  fruits:\n  - apple\n  - orange\n  vegetables:\n  -   veggieLike: true\n      veggieName: cabbage\n  ```\n\n'
+            "# JSON Schema\n\n",
+            "*Vegetable preferences*\n\n",
+            "## Additional Properties\n" "\n",
+            "- **Additional Properties** *(object)*: Additional info about foods you may "
+            "like.\n",
+            "  - **`^iLike(Meat|Drinks)$`** *(boolean)*: Do I like it?\n",
+            "## Properties\n\n",
+            "- **`fruits`** *(array)*\n",
+            "  - **Items** *(string)*\n",
+            "- **`vegetables`** *(array)*\n",
+            "  - **Items**: Refer to *#/definitions/veggie*.\n",
+            "## Definitions\n\n",
+            "- **`veggie`** *(object)*\n",
+            "  - **`veggieName`** *(string)*: The name of the vegetable.\n",
+            "  - **`veggieLike`** *(boolean)*: Do I like this vegetable?\n",
+            "## Examples\n\n",
+            "  ```yaml\n  fruits:\n  - apple\n  - orange\n  vegetables:\n  -   veggieLike: true\n      veggieName: cabbage\n  ```\n\n",
         ]
         assert expected_output == parser.parse_schema(self.test_schema)
 
@@ -200,19 +199,16 @@ class TestParser:
             "patternProperties": {
                 "^iLike(Meat|Drinks)$": {
                     "type": "boolean",
-                    "description": "Do I like it?"
+                    "description": "Do I like it?",
                 }
             },
         }
 
         expected_output = [
-            '# JSON Schema\n'
-            '\n',
-            '*Diet preferences*\n'
-            '\n',
-            '## Pattern Properties\n'
-            '\n',
-            '- **`^iLike(Meat|Drinks)$`** *(boolean)*: Do I like it?\n',
+            "# JSON Schema\n" "\n",
+            "*Diet preferences*\n" "\n",
+            "## Pattern Properties\n" "\n",
+            "- **`^iLike(Meat|Drinks)$`** *(boolean)*: Do I like it?\n",
         ]
 
         assert expected_output == parser.parse_schema(test_schema)
@@ -230,31 +226,55 @@ class TestParser:
                 "description": "A list of fruits",
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "description": "The name of the fruit",
-                        "type": "string"
-                    },
+                    "name": {"description": "The name of the fruit", "type": "string"},
                     "sweet": {
                         "description": "Whether it is sweet or not",
                         "type": "boolean",
-                    }
-                }
+                    },
+                },
             },
         }
 
         expected_output = [
-            '# Fruits\n'
-            '\n',
-            '*Fruits I like*\n'
-            '\n',
-            '## Items\n'
-            '\n',
-            '- **Items** *(object)*: A list of fruits.\n',
-            '  - **`name`** *(string)*: The name of the fruit.\n',
-            '  - **`sweet`** *(boolean)*: Whether it is sweet or not.\n',
+            "# Fruits\n" "\n",
+            "*Fruits I like*\n" "\n",
+            "## Items\n" "\n",
+            "- **Items** *(object)*: A list of fruits.\n",
+            "  - **`name`** *(string)*: The name of the fruit.\n",
+            "  - **`sweet`** *(boolean)*: Whether it is sweet or not.\n",
         ]
 
         assert expected_output == parser.parse_schema(test_schema)
+
+    def test_omit_top_level_metadata(self):
+        parser = jsonschema2md.Parser(omit_top_level_metadata=True)
+
+        fruit_schema = {
+            "$id": "https://example.com/arrays.schema.json",
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Fruits",
+            "description": "Fruits I like",
+            "type": "array",
+            "items": {
+                "description": "A list of fruits",
+                "type": "object",
+                "properties": {
+                    "name": {"description": "The name of the fruit", "type": "string"},
+                    "sweet": {
+                        "description": "Whether it is sweet or not",
+                        "type": "boolean",
+                    },
+                },
+            },
+        }
+        expected_output = [
+            "# JSON Schema\n\n",
+            "## Items\n\n",
+            "- **Items** *(object)*: A list of fruits.\n",
+            "  - **`name`** *(string)*: The name of the fruit.\n",
+            "  - **`sweet`** *(boolean)*: Whether it is sweet or not.\n",
+        ]
+        assert expected_output == parser.parse_schema(fruit_schema)
 
     def test_token_replacement(self):
         parser = jsonschema2md.Parser()
@@ -269,15 +289,12 @@ class TestParser:
                 "description": "A list of fruits",
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "description": "The name of the fruit",
-                        "type": "string"
-                    },
+                    "name": {"description": "The name of the fruit", "type": "string"},
                     "sweet": {
                         "description": "Whether it is sweet or not",
                         "type": "boolean",
-                    }
-                }
+                    },
+                },
             },
         }
         veg_schema = {
@@ -290,22 +307,23 @@ class TestParser:
                 "description": "A list of veggies",
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "description": "The name of the veggie",
-                        "type": "string"
-                    }
-                }
+                    "name": {"description": "The name of the veggie", "type": "string"}
+                },
             },
         }
-        
+
         out_file = tempfile.NamedTemporaryFile()
         shutil.copy2(f"{TEST_DIR}/templates/template.md", out_file.name)
 
         with open(f"{TEST_DIR}/templates/rendered_template.md") as f:
             expected_output = f.read()
 
-        write_lines_between_token(out_file.name, parser.parse_schema(fruit_schema), "fruits")
-        write_lines_between_token(out_file.name, parser.parse_schema(veg_schema), "veggies")
+        write_lines_between_token(
+            out_file.name, parser.parse_schema(fruit_schema), "fruits"
+        )
+        write_lines_between_token(
+            out_file.name, parser.parse_schema(veg_schema), "veggies"
+        )
 
         with open(out_file.name) as f:
             assert expected_output == f.read()
@@ -320,25 +338,21 @@ class TestParser:
             "properties": {
                 "all_of_example": {
                     "allOf": [
-                        { "type": "number" },
-                        { "type": "integer" },
+                        {"type": "number"},
+                        {"type": "integer"},
                     ]
                 },
                 "any_of_example": {
-                    "anyOf": [
-                        { "type": "string" },
-                        { "type": "number", "minimum": 0 }
-                    ]
+                    "anyOf": [{"type": "string"}, {"type": "number", "minimum": 0}]
                 },
                 "one_of_example": {
                     "default": [1, 2, 3],
                     "oneOf": [
-                        { "type": "null" },
-                        { "type": "array", "items": {"type": "number"}},
-                    ]
+                        {"type": "null"},
+                        {"type": "array", "items": {"type": "number"}},
+                    ],
                 },
-
-            }
+            },
         }
         expected_output = [
             "# JSON Schema\n\n",
@@ -356,6 +370,9 @@ class TestParser:
             "  - **One of**\n",
             "    - *null*\n",
             "    - *array*\n",
-            "      - **Items** *(number)*\n"
+            "      - **Items** *(number)*\n",
         ]
         assert expected_output == parser.parse_schema(test_schema)
+
+if __name__ == "__main__":
+    unittest.main()
