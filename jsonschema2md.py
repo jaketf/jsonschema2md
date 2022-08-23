@@ -241,10 +241,11 @@ class Parser:
         output_lines = []
 
         # Add title and description
-        if "title" in schema_object and not self.omit_top_level_metadata:
-            output_lines.append(f"# {schema_object['title']}\n\n")
-        else:
-            output_lines.append("# JSON Schema\n\n")
+        if not self.omit_top_level_metadata:
+            if "title" in schema_object
+                output_lines.append(f"# {schema_object['title']}\n\n")
+            else:
+                output_lines.append("# JSON Schema\n\n")
         if "description" in schema_object and not self.omit_top_level_metadata:
             output_lines.append(f"*{schema_object['description']}*\n\n")
 
