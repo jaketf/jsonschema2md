@@ -31,6 +31,24 @@ class TestParser(unittest.TestCase):
             "fruits": {"type": "array", "items": {"type": "string"}},
             "vegetables": {"type": "array", "items": {"$ref": "#/definitions/veggie"}},
         },
+        "dependencies": {
+            "fruits": {
+                "oneOf": [{
+                    "properties": {
+                        "fruits": {
+                            "const": "apple"
+                        },
+                        "toppings": {
+                            "type": "string",
+                            "enum": [
+                                "peanut butter",
+                                "caramel"
+                            ]
+                        }
+                    }
+                }]
+            }
+        },
         "definitions": {
             "veggie": {
                 "type": "object",
@@ -142,6 +160,11 @@ class TestParser(unittest.TestCase):
             "  - **Items** *(string)*\n",
             "- **`vegetables`** *(array)*\n",
             "  - **Items**: Refer to *#/definitions/veggie*.\n",
+            "## Dependencies\n\n",
+            "- **`fruits`**\n",
+            "  - **One of**\n",
+            "    - *apple*\n",
+            "      - **`toppings`** *(string)*: Must be one of: `['peanut butter', 'caramel']`.\n",
             "## Definitions\n\n",
             "- **`veggie`** *(object)*\n",
             "  - **`veggieName`** *(string)*: The name of the vegetable.\n",
@@ -178,6 +201,11 @@ class TestParser(unittest.TestCase):
             "  - **Items** *(string)*\n",
             "- **`vegetables`** *(array)*\n",
             "  - **Items**: Refer to *#/definitions/veggie*.\n",
+            "## Dependencies\n\n",
+            "- **`fruits`**\n",
+            "  - **One of**\n",
+            "    - *apple*\n",
+            "      - **`toppings`** *(string)*: Must be one of: `['peanut butter', 'caramel']`.\n",
             "## Definitions\n\n",
             "- **`veggie`** *(object)*\n",
             "  - **`veggieName`** *(string)*: The name of the vegetable.\n",

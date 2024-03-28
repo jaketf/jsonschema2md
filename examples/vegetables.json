@@ -3,9 +3,49 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "description": "Vegetable preferences",
     "type": "object",
+    "additionalProperties": {
+        "description": "Additional info about foods you may like",
+        "type": "object",
+        "patternProperties": {
+            "^iLike(Meat|Drinks)$": {
+                "type": "boolean",
+                "description": "Do I like it?"
+            }
+        }
+    },
     "properties": {
         "fruits": {"type": "array", "items": {"type": "string"}},
         "vegetables": {"type": "array", "items": {"$ref": "#/definitions/veggie"}}
+    },
+    "dependencies": {
+        "fruits": {
+            "oneOf": [{
+                "properties": {
+                    "fruits": {
+                        "enum": ["apple", "banana"]
+                    },
+                    "toppings": {
+                        "properties:": {
+                            "type": "string",
+                            "enum": ["peanut butter", "caramel", "honey"]
+                        }
+                    }
+                }
+            },
+            {
+                "properties": {
+                    "fruits": {
+                        "const": "orange"
+                    },
+                    "toppings": {
+                        "properties:": {
+                            "type": "string",
+                            "enum": ["peanut butter", "caramel"]
+                        }
+                    }
+                }
+            }]
+        }
     },
     "definitions": {
         "veggie": {

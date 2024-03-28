@@ -93,6 +93,8 @@ class Parser:
             description_line.append(f"Refer to *{obj['$ref']}*.")
         if "default" in obj:
             description_line.append(f"Default: `{obj['default']}`.")
+        if "dependencies" in obj:
+            description_line.append(f"Dependencies: `{obj['dependencies']}`.")
 
         # Only add start colon if items were added
         if description_line:
@@ -228,6 +230,16 @@ class Parser:
                         indent_level=indent_level + 1,
                     )
 
+        # Recursively add dependencies
+        if "dependencies" in obj:
+            for dependency_name, dependency_obj in obj["dependencies"].items():
+                output_lines = self._parse_object(
+                    dependency_obj,
+                    dependency_name,
+                    output_lines=output_lines,
+                    indent_level=indent_level + 1,
+                )
+
         # Add examples
         if self.show_examples in ["all", "properties"]:
             output_lines.extend(
@@ -283,6 +295,31 @@ class Parser:
                 output_lines.append(f"## {name.capitalize()}\n\n")
                 for obj_name, obj in schema_object[name].items():
                     output_lines.extend(self._parse_object(obj, obj_name))
+
+        # Add dependencies
+        base_indent = "  "
+        indent_level = 4
+        indent = base_indent * (indent_level // 2)
+        if "dependencies" in schema_object:
+            output_lines.append(f"## Dependencies\n\n")
+            for dep_name, dep_details in schema_object["dependencies"].items():
+                output_lines.append(f"- **`{dep_name}`**\n")
+                if "oneOf" in dep_details:
+                    output_lines.append(f"{base_indent}- **One of**\n")
+                    for condition in dep_details["oneOf"]:
+                        if "properties" in condition:
+                            for prop_name, prop_specs in condition["properties"].items():
+                                if "const" in prop_specs:
+                                    output_lines.append(f"{indent}- **`{prop_specs['const']}`**\n")
+                                elif "enum" in prop_specs:
+                                    enum_values = ", ".join([f"`{value}`" for value in prop_specs["enum"]])
+                                    output_lines.append(f"{indent}- **Must be one of: {enum_values}.**\n")
+                                else:
+                                    if 'properties:' in prop_specs:
+                                        prop_nest = prop_specs['properties:']
+                                        if 'enum' in prop_nest:
+                                            enum_values_formatted = ", ".join([f"`{value}`" for value in prop_nest['enum']])
+                                            output_lines.append(f"{base_indent * (indent_level - 1)}- **{prop_name}**: {enum_values_formatted}\n")
 
         # Add examples
         if "examples" in schema_object and self.show_examples in ["all", "object"]:
